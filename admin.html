@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel — Maktab</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f0f2f5; color: #1a1a1a; }
+
+  /* LOGIN */
+  #login-sahifa { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+  .login-box { background: #fff; border-radius: 16px; padding: 2.5rem; width: 360px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
+  .login-box h2 { font-size: 20px; font-weight: 600; margin-bottom: 1.5rem; text-align: center; color: #0C447C; }
+  .login-box input { width: 100%; padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; font-family: inherit; margin-bottom: 12px; outline: none; }
+  .login-box input:focus { border-color: #185FA5; }
+  .btn-login { width: 100%; padding: 11px; background: #0C447C; color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit; }
+  .btn-login:hover { background: #185FA5; }
+  .login-xato { color: #c0392b; font-size: 13px; text-align: center; margin-top: 10px; }
+
+  /* ADMIN LAYOUT */
+  #admin-sahifa { display: none; }
+  .topbar { background: #0C447C; color: #fff; padding: 0 2rem; height: 56px; display: flex; align-items: center; justify-content: space-between; }
+  .topbar-title { font-size: 15px; font-weight: 600; }
+  .btn-chiq { background: rgba(255,255,255,0.15); border: none; color: #fff; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-family: inherit; }
+
+  .admin-body { display: flex; min-height: calc(100vh - 56px); }
+  .sidebar { width: 200px; background: #fff; border-right: 1px solid #e8e8e8; padding: 1rem 0; flex-shrink: 0; }
+  .side-btn { display: block; width: 100%; text-align: left; padding: 10px 20px; background: none; border: none; font-size: 14px; cursor: pointer; font-family: inherit; color: #444; transition: all 0.1s; }
+  .side-btn:hover, .side-btn.active { background: #E6F1FB; color: #0C447C; font-weight: 600; }
+
+  .main { flex: 1; padding: 2rem; }
+  .main h2 { font-size: 18px; font-weight: 600; margin-bottom: 1.5rem; }
+
+  .tab { display: none; }
+  .tab.active { display: block; }
+
+  /* JADVAL */
+  table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 12px; overflow: hidden; }
+  th { background: #185FA5; color: #fff; padding: 10px 14px; text-align: left; font-size: 13px; }
+  td { padding: 10px 14px; font-size: 13px; border-bottom: 1px solid #f0f0f0; }
+  tr:last-child td { border-bottom: none; }
+
+  /* TUGMALAR */
+  .btn { padding: 7px 16px; border: none; border-radius: 7px; cursor: pointer; font-size: 13px; font-family: inherit; font-weight: 500; }
+  .btn-yashil { background: #1D9E75; color: #fff; }
+  .btn-yashil:hover { background: #0F6E56; }
+  .btn-qizil { background: #e74c3c; color: #fff; }
+  .btn-qizil:hover { background: #c0392b; }
+  .btn-sariq { background: #f39c12; color: #fff; }
+  .btn-sariq:hover { background: #d68910; }
+  .btn-ko'k { background: #0C447C; color: #fff; }
+  .btn-ko'k:hover { background: #185FA5; }
+
+  /* FORMA */
+  .forma { background: #fff; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid #e8e8e8; }
+  .forma h3 { font-size: 15px; font-weight: 600; margin-bottom: 1rem; color: #0C447C; }
+  .forma label { font-size: 13px; color: #555; display: block; margin-bottom: 4px; margin-top: 10px; }
+  .forma input, .forma textarea, .forma select { width: 100%; padding: 9px 12px; border: 1px solid #ddd; border-radius: 7px; font-size: 13px; font-family: inherit; outline: none; }
+  .forma input:focus, .forma textarea:focus { border-color: #185FA5; }
+  .forma textarea { resize: vertical; min-height: 80px; }
+  .forma-qator { display: flex; gap: 10px; margin-top: 14px; }
+
+  .xabar { padding: 10px 16px; border-radius: 8px; font-size: 13px; margin-bottom: 1rem; }
+  .xabar.ok { background: #EAF3DE; color: #3B6D11; }
+  .xabar.xato { background: #FCEBEB; color: #A32D2D; }
+
+  .badge-default { background: #E6F1FB; color: #0C447C; padding: 2px 8px; border-radius: 10px; font-size: 11px; }
+  .badge-green { background: #EAF3DE; color: #3B6D11; padding: 2px 8px; border-radius: 10px; font-size: 11px; }
+  .badge-amber { background: #FAEEDA; color: #854F0B; padding: 2px 8px; border-radius: 10px; font-size: 11px; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-sahifa">
+  <div class="login-box">
+    <h2>🔐 Admin kirish</h2>
+    <input type="text" id="login-input" placeholder="Login" value="admin">
+    <input type="password" id="parol-input" placeholder="Parol">
+    <button class="btn-login" onclick="kirish()">Kirish</button>
+    <div class="login-xato" id="login-xato"></div>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div id="admin-sahifa">
+  <div class="topbar">
+    <div class="topbar-title">🏫 Maktab — Admin Panel</div>
+    <button class="btn-chiq" onclick="chiqish()">Chiqish</button>
+  </div>
+  <div class="admin-body">
+    <div class="sidebar">
+      <button class="side-btn active" onclick="showTab('yangiliklar', this)">📰 Yangiliklar</button>
+      <button class="side-btn" onclick="showTab('oqituvchilar', this)">👨‍🏫 O'qituvchilar</button>
+      <button class="side-btn" onclick="showTab('sozlamalar', this)">⚙️ Sozlamalar</button>
+    </div>
+
+    <div class="main">
+
+      <!-- YANGILIKLAR TAB -->
+      <div id="tab-yangiliklar" class="tab active">
+        <h2>📰 Yangiliklar boshqaruvi</h2>
+        <div id="xabar-y" class="xabar" style="display:none"></div>
+
+        <div class="forma">
+          <h3 id="y-forma-sarlavha">➕ Yangi yangilik qo'shish</h3>
+          <input type="hidden" id="y-id">
+          <label>Badge matni</label>
+          <input type="text" id="y-badge" placeholder="Masalan: E'lon, Tadbir, Natija">
+          <label>Badge turi</label>
+          <select id="y-badgeType">
+            <option value="default">Ko'k (E'lon)</option>
+            <option value="green">Yashil (Tadbir)</option>
+            <option value="amber">Sariq (Natija)</option>
+          </select>
+          <label>Sana</label>
+          <input type="text" id="y-sana" placeholder="Masalan: 15 iyun, 2025">
+          <label>Sarlavha</label>
+          <textarea id="y-sarlavha" placeholder="Yangilik matni..."></textarea>
+          <div class="forma-qator">
+            <button class="btn btn-yashil" onclick="saqlYangilik()">💾 Saqlash</button>
+            <button class="btn btn-sariq" onclick="tozaYForma()">✖ Bekor</button>
+          </div>
+        </div>
+
+        <table>
+          <thead><tr><th>Badge</th><th>Sana</th><th>Sarlavha</th><th>Amal</th></tr></thead>
+          <tbody id="yangiliklar-tbody"><tr><td colspan="4" style="text-align:center;color:#888">Yuklanmoqda...</td></tr></tbody>
+        </table>
+      </div>
+
+      <!-- O'QITUVCHILAR TAB -->
+      <div id="tab-oqituvchilar" class="tab">
+        <h2>👨‍🏫 O'qituvchilar boshqaruvi</h2>
+        <div id="xabar-o" class="xabar" style="display:none"></div>
+
+        <div class="forma">
+          <h3 id="o-forma-sarlavha">➕ Yangi o'qituvchi qo'shish</h3>
+          <input type="hidden" id="o-id">
+          <label>Bosh harflar (avatar uchun, masalan: AA)</label>
+          <input type="text" id="o-init" placeholder="AA" maxlength="2">
+          <label>To'liq ism</label>
+          <input type="text" id="o-ism" placeholder="Azimov Anvar Aliyevich">
+          <label>Fan</label>
+          <input type="text" id="o-fan" placeholder="Matematika">
+          <label>Qisqa ma'lumot</label>
+          <textarea id="o-bio" placeholder="O'qituvchi haqida..."></textarea>
+          <label>Tajriba</label>
+          <input type="text" id="o-tajriba" placeholder="18 yil tajriba">
+          <label>Tartib raqami (ro'yxatdagi o'rni)</label>
+          <input type="number" id="o-tartib" placeholder="1" value="0">
+          <div class="forma-qator">
+            <button class="btn btn-yashil" onclick="saqlOqituvchi()">💾 Saqlash</button>
+            <button class="btn btn-sariq" onclick="tozaOForma()">✖ Bekor</button>
+          </div>
+        </div>
+
+        <table>
+          <thead><tr><th>Ism</th><th>Fan</th><th>Tajriba</th><th>Amal</th></tr></thead>
+          <tbody id="oqituvchilar-tbody"><tr><td colspan="4" style="text-align:center;color:#888">Yuklanmoqda...</td></tr></tbody>
+        </table>
+      </div>
+
+      <!-- SOZLAMALAR TAB -->
+      <div id="tab-sozlamalar" class="tab">
+        <h2>⚙️ Sozlamalar</h2>
+        <div id="xabar-s" class="xabar" style="display:none"></div>
+        <div class="forma" style="max-width:400px">
+          <h3>🔑 Parolni o'zgartirish</h3>
+          <label>Yangi parol (kamida 6 ta belgi)</label>
+          <input type="password" id="yangi-parol" placeholder="Yangi parol">
+          <label>Parolni tasdiqlang</label>
+          <input type="password" id="yangi-parol2" placeholder="Qaytadan kiriting">
+          <div class="forma-qator">
+            <button class="btn btn-ko'k" onclick="parolOzgartir()">💾 O'zgartirish</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  let TOKEN = localStorage.getItem('maktab_token') || '';
+
+  // ── AUTH ──────────────────────────────────────────────────────────
+  async function kirish() {
+    const login = document.getElementById('login-input').value;
+    const parol = document.getElementById('parol-input').value;
+    const res = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ login, parol })
+    });
+    const data = await res.json();
+    if (data.token) {
+      TOKEN = data.token;
+      localStorage.setItem('maktab_token', TOKEN);
+      document.getElementById('login-sahifa').style.display = 'none';
+      document.getElementById('admin-sahifa').style.display = 'block';
+      yukleYangiliklar();
+    } else {
+      document.getElementById('login-xato').textContent = data.xato || 'Xato!';
+    }
+  }
+
+  function chiqish() {
+    TOKEN = '';
+    localStorage.removeItem('maktab_token');
+    location.reload();
+  }
+
+  if (TOKEN) {
+    document.getElementById('login-sahifa').style.display = 'none';
+    document.getElementById('admin-sahifa').style.display = 'block';
+    yukleYangiliklar();
+  }
+
+  document.getElementById('parol-input').addEventListener('keydown', e => { if (e.key === 'Enter') kirish(); });
+
+  // ── TAB ───────────────────────────────────────────────────────────
+  function showTab(id, btn) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.side-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + id).classList.add('active');
+    btn.classList.add('active');
+    if (id === 'yangiliklar') yukleYangiliklar();
+    if (id === 'oqituvchilar') yukleOqituvchilar();
+  }
+
+  function xabarKo(id, matn, tur) {
+    const el = document.getElementById(id);
+    el.textContent = matn;
+    el.className = 'xabar ' + tur;
+    el.style.display = 'block';
+    setTimeout(() => el.style.display = 'none', 3000);
+  }
+
+  // ── YANGILIKLAR ───────────────────────────────────────────────────
+  async function yukleYangiliklar() {
+    const res = await fetch('/api/yangiliklar');
+    const list = await res.json();
+    const tbody = document.getElementById('yangiliklar-tbody');
+    if (!list.length) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#888">Hali yangilik yo\'q</td></tr>'; return; }
+    tbody.innerHTML = list.map(y => `
+      <tr>
+        <td><span class="badge-${y.badgeType}">${y.badge}</span></td>
+        <td>${y.sana}</td>
+        <td>${y.sarlavha}</td>
+        <td style="display:flex;gap:6px;padding:8px 14px">
+          <button class="btn btn-sariq" onclick="tahrirlY('${y._id}','${escHtml(y.badge)}','${y.badgeType}','${escHtml(y.sana)}',\`${escHtml(y.sarlavha)}\`)">✏️</button>
+          <button class="btn btn-qizil" onclick="ochirY('${y._id}')">🗑️</button>
+        </td>
+      </tr>`).join('');
+  }
+
+  async function saqlYangilik() {
+    const id = document.getElementById('y-id').value;
+    const body = {
+      badge: document.getElementById('y-badge').value,
+      badgeType: document.getElementById('y-badgeType').value,
+      sana: document.getElementById('y-sana').value,
+      sarlavha: document.getElementById('y-sarlavha').value
+    };
+    if (!body.sarlavha || !body.badge) { xabarKo('xabar-y', 'Badge va sarlavha to\'ldiring!', 'xato'); return; }
+    const url = id ? `/api/yangiliklar/${id}` : '/api/yangiliklar';
+    const method = id ? 'PUT' : 'POST';
+    const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN }, body: JSON.stringify(body) });
+    if (res.ok) { xabarKo('xabar-y', 'Saqlandi ✓', 'ok'); tozaYForma(); yukleYangiliklar(); }
+    else xabarKo('xabar-y', 'Xatolik yuz berdi', 'xato');
+  }
+
+  function tahrirlY(id, badge, badgeType, sana, sarlavha) {
+    document.getElementById('y-id').value = id;
+    document.getElementById('y-badge').value = badge;
+    document.getElementById('y-badgeType').value = badgeType;
+    document.getElementById('y-sana').value = sana;
+    document.getElementById('y-sarlavha').value = sarlavha;
+    document.getElementById('y-forma-sarlavha').textContent = '✏️ Tahrirlash';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  async function ochirY(id) {
+    if (!confirm('Yangilikni o\'chirasizmi?')) return;
+    await fetch(`/api/yangiliklar/${id}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + TOKEN } });
+    yukleYangiliklar();
+  }
+
+  function tozaYForma() {
+    ['y-id','y-badge','y-sana','y-sarlavha'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('y-badgeType').value = 'default';
+    document.getElementById('y-forma-sarlavha').textContent = '➕ Yangi yangilik qo\'shish';
+  }
+
+  // ── O'QITUVCHILAR ─────────────────────────────────────────────────
+  async function yukleOqituvchilar() {
+    const res = await fetch('/api/oqituvchilar');
+    const list = await res.json();
+    const tbody = document.getElementById('oqituvchilar-tbody');
+    if (!list.length) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#888">Hali o\'qituvchi yo\'q</td></tr>'; return; }
+    tbody.innerHTML = list.map(o => `
+      <tr>
+        <td>${o.ism}</td>
+        <td>${o.fan}</td>
+        <td>${o.tajriba}</td>
+        <td style="display:flex;gap:6px;padding:8px 14px">
+          <button class="btn btn-sariq" onclick="tahrirlO('${o._id}','${escHtml(o.init)}','${escHtml(o.ism)}','${escHtml(o.fan)}',\`${escHtml(o.bio)}\`,'${escHtml(o.tajriba)}','${o.tartib}')">✏️</button>
+          <button class="btn btn-qizil" onclick="ochirO('${o._id}')">🗑️</button>
+        </td>
+      </tr>`).join('');
+  }
+
+  async function saqlOqituvchi() {
+    const id = document.getElementById('o-id').value;
+    const body = {
+      init: document.getElementById('o-init').value.toUpperCase(),
+      ism: document.getElementById('o-ism').value,
+      fan: document.getElementById('o-fan').value,
+      bio: document.getElementById('o-bio').value,
+      tajriba: document.getElementById('o-tajriba').value,
+      tartib: parseInt(document.getElementById('o-tartib').value) || 0
+    };
+    if (!body.ism || !body.fan) { xabarKo('xabar-o', 'Ism va fan to\'ldiring!', 'xato'); return; }
+    const url = id ? `/api/oqituvchilar/${id}` : '/api/oqituvchilar';
+    const method = id ? 'PUT' : 'POST';
+    const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN }, body: JSON.stringify(body) });
+    if (res.ok) { xabarKo('xabar-o', 'Saqlandi ✓', 'ok'); tozaOForma(); yukleOqituvchilar(); }
+    else xabarKo('xabar-o', 'Xatolik yuz berdi', 'xato');
+  }
+
+  function tahrirlO(id, init, ism, fan, bio, tajriba, tartib) {
+    document.getElementById('o-id').value = id;
+    document.getElementById('o-init').value = init;
+    document.getElementById('o-ism').value = ism;
+    document.getElementById('o-fan').value = fan;
+    document.getElementById('o-bio').value = bio;
+    document.getElementById('o-tajriba').value = tajriba;
+    document.getElementById('o-tartib').value = tartib;
+    document.getElementById('o-forma-sarlavha').textContent = '✏️ Tahrirlash';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  async function ochirO(id) {
+    if (!confirm('O\'qituvchini o\'chirasizmi?')) return;
+    await fetch(`/api/oqituvchilar/${id}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + TOKEN } });
+    yukleOqituvchilar();
+  }
+
+  function tozaOForma() {
+    ['o-id','o-init','o-ism','o-fan','o-bio','o-tajriba'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('o-tartib').value = 0;
+    document.getElementById('o-forma-sarlavha').textContent = '➕ Yangi o\'qituvchi qo\'shish';
+  }
+
+  // ── PAROL ─────────────────────────────────────────────────────────
+  async function parolOzgartir() {
+    const p1 = document.getElementById('yangi-parol').value;
+    const p2 = document.getElementById('yangi-parol2').value;
+    if (p1 !== p2) { xabarKo('xabar-s', 'Parollar mos kelmadi!', 'xato'); return; }
+    const res = await fetch('/api/parol', { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN }, body: JSON.stringify({ yangiParol: p1 }) });
+    const data = await res.json();
+    if (data.ok) xabarKo('xabar-s', 'Parol o\'zgartirildi ✓', 'ok');
+    else xabarKo('xabar-s', data.xato || 'Xatolik', 'xato');
+  }
+
+  function escHtml(s) { return (s || '').replace(/'/g, "\\'").replace(/`/g, '\\`'); }
+</script>
+</body>
+</html>
