@@ -1,1 +1,239 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maktab - Admin va Frontend</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', sans-serif; background: #f5f5f0; color: #1a1a1a; }
+  .nav { background: #0C447C; padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 60px; position: sticky; top: 0; z-index: 100; }
+  .nav-logo { color: #fff; font-size: 15px; font-weight: 600; }
+  .nav-links { display: flex; gap: 4px; }
+  .nav-btn { background: transparent; border: none; color: rgba(255,255,255,0.8); padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 14px; font-family: inherit; transition: all 0.15s; }
+  .nav-btn:hover, .nav-btn.active { background: rgba(255,255,255,0.15); color: #fff; }
+  
+  .hero { background: linear-gradient(135deg, #0C447C 0%, #185FA5 60%, #1D9E75 100%); color: white; padding: 4rem 2rem 5rem; text-align: center; }
+  .hero h1 { font-size: 32px; font-weight: 600; margin-bottom: 12px; }
+  .hero p { font-size: 16px; opacity: 0.85; max-width: 560px; margin: 0 auto 2rem; line-height: 1.7; }
+  .hero-stats { display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap; margin-top: 2rem; }
+  .stat-item { text-align: center; }
+  .stat-num { font-size: 28px; font-weight: 600; }
+  .stat-lbl { font-size: 13px; opacity: 0.75; margin-top: 2px; }
+  
+  .content { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .section-title { font-size: 20px; font-weight: 600; margin-bottom: 1.5rem; }
+  
+  .news-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 2.5rem; }
+  .news-card { background: #fff; border-radius: 12px; border: 1px solid rgba(0,0,0,0.1); padding: 1.25rem; }
+  .news-badge { display: inline-block; font-size: 11px; padding: 3px 10px; border-radius: 20px; margin-bottom: 10px; background: #E6F1FB; color: #0C447C; }
+  .news-badge.green { background: #EAF3DE; color: #3B6D11; }
+  .news-badge.amber { background: #FAEEDA; color: #854F0B; }
+  .news-date { font-size: 12px; color: #888; margin-bottom: 8px; }
+  .news-title { font-size: 14px; font-weight: 500; line-height: 1.5; }
+  .news-image { width: 100%; height: 150px; object-fit: cover; border-radius: 8px; margin-top: 10px; }
+  
+  .about-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-bottom: 2rem; }
+  .about-card { background: #fff; border-radius: 12px; border: 1px solid rgba(0,0,0,0.1); padding: 1.5rem; }
+  .about-card h3 { font-size: 15px; font-weight: 600; margin-bottom: 8px; color: #0C447C; }
+  .about-card p { font-size: 14px; line-height: 1.7; color: #444; }
+  
+  .teachers-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-bottom: 2.5rem; }
+  .teacher-card { background: #fff; border-radius: 12px; border: 1px solid rgba(0,0,0,0.1); padding: 1.5rem; display: flex; gap: 16px; align-items: flex-start; }
+  .teacher-avatar { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 600; flex-shrink: 0; }
+  .teacher-avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+  .teacher-info .name { font-size: 15px; font-weight: 600; margin-bottom: 3px; }
+  .teacher-info .fan { font-size: 13px; color: #185FA5; margin-bottom: 6px; font-weight: 500; }
+  .teacher-info .bio { font-size: 13px; color: #555; line-height: 1.6; margin-bottom: 8px; }
+  .teacher-exp { font-size: 11px; padding: 3px 10px; border-radius: 20px; display: inline-block; background: #E6F1FB; color: #0C447C; }
+  
+  .contact-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 2rem; }
+  .contact-card { background: #fff; border-radius: 12px; border: 1px solid rgba(0,0,0,0.1); padding: 1.25rem; text-align: center; }
+  .contact-icon { font-size: 28px; margin-bottom: 10px; }
+  .contact-label { font-size: 12px; color: #888; margin-bottom: 4px; }
+  .contact-value { font-size: 14px; font-weight: 500; }
+  
+  .loading { text-align: center; color: #888; padding: 2rem; }
+  .footer { background: #0C447C; color: rgba(255,255,255,0.7); padding: 2rem; text-align: center; font-size: 13px; margin-top: 2rem; }
+  .page { display: none; }
+  .page.active { display: block; }
+</style>
+</head>
+<body>
 
+<nav class="nav">
+  <div class="nav-logo">🏫 Maktab</div>
+  <div class="nav-links">
+    <button class="nav-btn active" onclick="showPage('bosh', this)">Bosh</button>
+    <button class="nav-btn" onclick="showPage('haqida', this)">Haqida</button>
+    <button class="nav-btn" onclick="showPage('oqituvchilar', this)">O'qituvchilar</button>
+    <button class="nav-btn" onclick="showPage('aloqa', this)">Aloqa</button>
+  </div>
+</nav>
+
+<!-- BOSH -->
+<div id="bosh" class="page active">
+  <div class="hero">
+    <h1 id="hero-nomi">Maktab nomi yuklanmoqda...</h1>
+    <p id="hero-tavsifi">Tavsif yuklanmoqda...</p>
+    <div class="hero-stats">
+      <div class="stat-item"><div class="stat-num" id="stat-oquvchilar">0</div><div class="stat-lbl">O'quvchilar</div></div>
+      <div class="stat-item"><div class="stat-num" id="stat-oqituvchilar">0</div><div class="stat-lbl">O'qituvchilar</div></div>
+      <div class="stat-item"><div class="stat-num" id="stat-sinflar">0</div><div class="stat-lbl">Sinflar</div></div>
+      <div class="stat-item"><div class="stat-num" id="stat-yili">0</div><div class="stat-lbl">Tashkil</div></div>
+    </div>
+  </div>
+  <div class="content">
+    <h2 class="section-title">📰 So'nggi yangiliklar</h2>
+    <div id="yangiliklar-container" class="news-grid">
+      <div class="loading">Yuklanmoqda...</div>
+    </div>
+  </div>
+</div>
+
+<!-- HAQIDA -->
+<div id="haqida" class="page">
+  <div class="content">
+    <h2 class="section-title">🏫 Maktab haqida</h2>
+    <div id="about-container" class="about-grid">
+      <div class="loading">Yuklanmoqda...</div>
+    </div>
+  </div>
+</div>
+
+<!-- O'QITUVCHILAR -->
+<div id="oqituvchilar" class="page">
+  <div class="content">
+    <h2 class="section-title">👨‍🏫 O'qituvchilar</h2>
+    <div id="teachers-container" class="teachers-grid">
+      <div class="loading">Yuklanmoqda...</div>
+    </div>
+  </div>
+</div>
+
+<!-- ALOQA -->
+<div id="aloqa" class="page">
+  <div class="content">
+    <h2 class="section-title">📞 Aloqa</h2>
+    <div id="contact-container" class="contact-grid">
+      <div class="loading">Yuklanmoqda...</div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  © 2025 Maktab · Toshkent
+</div>
+
+<script>
+  function showPage(id, btn) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  async function yukleHero() {
+    try {
+      const res = await fetch('/api/hero');
+      const h = await res.json();
+      document.getElementById('hero-nomi').textContent = h.nomi || 'Maktab';
+      document.getElementById('hero-tavsifi').textContent = h.tavsifi || '';
+      document.getElementById('stat-oquvchilar').textContent = h.oquvchilar || 0;
+      document.getElementById('stat-oqituvchilar').textContent = h.oqituvchilar || 0;
+      document.getElementById('stat-sinflar').textContent = h.sinflar || 0;
+      document.getElementById('stat-yili').textContent = h.yili || 0;
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function yukleYangiliklar() {
+    try {
+      const res = await fetch('/api/yangiliklar');
+      const list = await res.json();
+      const cont = document.getElementById('yangiliklar-container');
+      if (!list.length) {
+        cont.innerHTML = '<div class="loading">Yangiliklar mavjud emas</div>';
+        return;
+      }
+      cont.innerHTML = list.map(y => `
+        <div class="news-card">
+          <span class="news-badge ${y.badgeType !== 'default' ? y.badgeType : ''}">${y.badge}</span>
+          <div class="news-date">${y.sana}</div>
+          <div class="news-title">${y.sarlavha}</div>
+          ${y.rasm ? `<img src="${y.rasm}" class="news-image" alt="">` : ''}
+        </div>`).join('');
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function yukleAbout() {
+    try {
+      const res = await fetch('/api/maktab-haqida');
+      const h = await res.json();
+      const cont = document.getElementById('about-container');
+      cont.innerHTML = `
+        <div class="about-card"><h3>📖 Tarix</h3><p>${h.tarix || ''}</p></div>
+        <div class="about-card"><h3>🎯 Maqsad</h3><p>${h.maqsad || ''}</p></div>
+        <div class="about-card"><h3>🏆 Yutuqlar</h3><p>${h.yutuqlar || ''}</p></div>
+        <div class="about-card"><h3>🔬 Moddiy baza</h3><p>${h.moddiyBaza || ''}</p></div>
+        <div class="about-card"><h3>🌐 Tillar</h3><p>${h.tillar || ''}</p></div>
+        <div class="about-card"><h3>👨‍👩‍👧 Hayot</h3><p>${h.hayot || ''}</p></div>
+      `;
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function yukleTeachers() {
+    try {
+      const res = await fetch('/api/oqituvchilar');
+      const list = await res.json();
+      const cont = document.getElementById('teachers-container');
+      if (!list.length) {
+        cont.innerHTML = '<div class="loading">O\'qituvchilar mavjud emas</div>';
+        return;
+      }
+      cont.innerHTML = list.map(o => `
+        <div class="teacher-card">
+          <div class="teacher-avatar" style="background:${o.avatarRang};color:${o.avatarMatn}">
+            ${o.rasm ? `<img src="${o.rasm}" alt="">` : o.init}
+          </div>
+          <div class="teacher-info">
+            <div class="name">${o.ism}</div>
+            <div class="fan">${o.fan}</div>
+            <div class="bio">${o.bio}</div>
+            <span class="teacher-exp">${o.tajriba}</span>
+          </div>
+        </div>`).join('');
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function yukleContact() {
+    try {
+      const res = await fetch('/api/aloqa');
+      const a = await res.json();
+      const cont = document.getElementById('contact-container');
+      cont.innerHTML = `
+        <div class="contact-card"><div class="contact-icon">📍</div><div class="contact-label">Manzil</div><div class="contact-value">${a.manzil || ''}</div></div>
+        <div class="contact-card"><div class="contact-icon">📞</div><div class="contact-label">Telefon</div><div class="contact-value">${a.telefon || ''}</div></div>
+        <div class="contact-card"><div class="contact-icon">📧</div><div class="contact-label">Email</div><div class="contact-value">${a.email || ''}</div></div>
+        <div class="contact-card"><div class="contact-icon">🕐</div><div class="contact-label">Ish vaqti</div><div class="contact-value">${a.ishVaqti || ''}</div></div>
+      `;
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  yukleHero();
+  yukleYangiliklar();
+  yukleAbout();
+  yukleTeachers();
+  yukleContact();
+</script>
+</body>
+</html>
